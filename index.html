@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simbología de Bodega y Almacenamiento</title>
+<style>
+:root{--ink:#111;--panel:#151a22}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at top,#25364d,#090d14 70%);font-family:Arial,Helvetica,sans-serif;color:#fff;display:flex;flex-direction:column;align-items:center}
+header{width:min(100%,1000px);padding:16px 14px 8px;text-align:center}
+h1{font-size:clamp(23px,4vw,36px);margin:8px 0;color:#fff;text-shadow:0 2px 8px #000}
+.sub{color:#c8d0da;font-size:14px}
+.status{width:min(96%,900px);display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;margin:12px auto}
+.stat{background:#202b3a;border:1px solid #506176;border-radius:12px;padding:10px 16px;font-size:18px;font-weight:bold;flex:1;text-align:center;min-width:115px}
+#timer{color:#ffe45c}
+
+main{
+ width:98%;
+ max-width:1250px;
+ background:#f5f6f8;
+ color:#111;
+ border-radius:18px;
+ padding:clamp(18px,3vw,35px);
+ box-shadow:0 12px 35px #0008;
+ margin:8px auto 20px;
+}
+
+#counter{font-weight:bold;color:#39485b;text-align:center;margin-bottom:10px}
+#question{font-size:clamp(21px,3.5vw,30px);line-height:1.25;text-align:center;font-weight:900;margin:12px 0 18px}
+/* #symbolImage{height:145px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+#symbolImage img{max-height:140px;max-width:180px;object-fit:contain;background:white;border:2px solid #d5dbe2;border-radius:12px;padding:5px} */
+
+#symbolImage{
+ height:190px;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ margin:0 auto 12px;
+}
+
+#symbolImage img{
+ max-height:180px;
+ max-width:220px;
+ width:auto;
+ height:auto;
+ object-fit:contain;
+ background:white;
+ border:2px solid #d5dbe2;
+ border-radius:12px;
+ padding:6px;
+}
+
+#symbolImage .emoji{font-size:90px;line-height:1}
+
+.answers{
+ display:grid;
+ grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:15px;
+ width:100%;
+}
+
+.answer{
+ border:0;
+ border-radius:12px;
+ padding:18px 10px;
+ min-height:115px;
+ color:white;
+ font-size:clamp(15px,1.8vw,23px);
+ font-weight:900;
+ cursor:pointer;
+ text-shadow:0 1px 2px #0008;
+ box-shadow:0 4px 0 #0005;
+ transition:transform .12s,filter .12s;
+ overflow-wrap:anywhere;
+}
+
+
+
+.answer:hover{filter:brightness(1.12);transform:translateY(-2px)}
+.answer:disabled{cursor:not-allowed;opacity:.9}
+.answer.red{background:#d71920}
+.answer.blue{background:#075fc4}
+.answer.black{background:#111}
+.answer.green{background:#16833a}
+.answer.yellow{background:#ffdf28;color:#111;text-shadow:none}
+#startScreen,#endScreen{position:fixed;inset:0;background:#000e;display:flex;align-items:center;justify-content:center;z-index:20;padding:18px}
+.modal{width:min(92vw,600px);background:#172231;border:2px solid #8495a8;border-radius:18px;padding:26px;text-align:center;box-shadow:0 15px 50px #000}
+.modal h2{font-size:28px;margin:0 0 12px}
+.modal p{font-size:17px;line-height:1.5;color:#e0e6ed}
+#startRobot{font-size:clamp(80px,18vw,170px);display:block;animation:robotZoom 1s ease-in-out both}
+@keyframes robotZoom{0%{transform:scale(.05) rotate(-360deg)}70%{transform:scale(5) rotate(20deg)}100%{transform:scale(1) rotate(0)}}
+#startBtn{background:#f6c928;color:#111;border:0;border-radius:12px;padding:14px 28px;font-size:20px;font-weight:900;cursor:pointer;margin-top:10px}
+#feedback{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:15;pointer-events:none;font-size:clamp(100px,25vw,230px);font-weight:900;text-shadow:0 5px 15px #0008}
+#feedback.good{color:#168cff;display:flex;animation:pop .3s ease-out}
+#feedback.bad{color:#ff2020;display:flex;animation:pop .3s ease-out}
+@keyframes pop{0%{transform:scale(.1)}65%{transform:scale(1.25)}100%{transform:scale(1)}}
+
+/* EFECTO DE BURBUJAS */
+#bubbleEffect{
+ position:fixed;
+ inset:0;
+ z-index:16;
+ pointer-events:none;
+ overflow:hidden;
+}
+
+.bubble{
+ position:absolute;
+ border-radius:50%;
+ transform:translate(-50%,-50%) scale(.05);
+ animation:bubbleZoom .5s ease-out forwards;
+ opacity:0;
+ pointer-events:none;
+ box-shadow:
+  inset -8px -10px 15px #0004,
+  inset 5px 5px 12px #ffffffa0,
+  0 4px 12px #0005;
+}
+
+.bubble.red{
+ background:radial-gradient(circle at 30% 25%,
+ #ffaaaa,#ff2020 55%,#a80000);
+}
+
+.bubble.blue{
+ background:radial-gradient(circle at 30% 25%,
+ #b5e5ff,#168cff 55%,#003b9a);
+}
+
+.bubble.yellow{
+ background:radial-gradient(circle at 30% 25%,
+ #fff9a8,#ffdf28 55%,#d69b00);
+}
+
+@keyframes bubbleZoom{
+ 0%{
+  transform:translate(-50%,-50%) scale(.05);
+  opacity:0;
+ }
+ 35%{
+  opacity:1;
+ }
+ 100%{
+  transform:translate(-50%,-50%) scale(1);
+  opacity:0;
+ }
+}
+
+
+#endScreen{display:none}
+.final-note{font-size:clamp(60px,15vw,110px);font-weight:1000;color:#ffe45c;margin:20px 0}
+footer{margin-top:auto;width:100%;text-align:center;padding:12px 8px 15px;color:#aeb4bc;font-size:11px;letter-spacing:.2px}
+
+@media(max-width:500px){
+
+ /* ALTERNATIVAS EN FILAS VERTICALES */
+ .answers{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+  width:100%;
+ }
+
+ /* TAMAÑO DE LOS BOTONES */
+ .answer{
+  width:100%;
+  min-height:65px;
+  font-size:17px;
+  padding:14px 12px;
+ }
+
+ /* AGRANDAR ZONA DE PREGUNTAS */
+ main{
+  width:99%;
+  max-width:100%;
+  padding:12px;
+ }
+
+ /* OCULTAR CONTADOR DE ERRADAS Y PREGUNTAS */
+ .status .stat:nth-child(3),
+ .status .stat:nth-child(4){
+  display:none;
+ }
+
+ /* DISTRIBUCIÓN DE LOS CONTADORES VISIBLES */
+ .status{
+  width:98%;
+  gap:6px;
+  flex-wrap:nowrap;
+ }
+
+ .status .stat{
+  min-width:0;
+  flex:1;
+  font-size:15px;
+  padding:10px 4px;
+ }
+
+}
+
+
+
+</style>
+</head>
+<body>
+<header>
+<h1>SIMBOLOGÍA DE BODEGA Y ALMACENAMIENTO</h1>
+
+</header>
+<div class="status">
+ <div class="stat">⏱️ Tiempo: <span id="timer">180</span> s</div>
+ <div class="stat">✅ Correctas: <span id="correctCount">0</span></div>
+ <div class="stat">❌ Erradas: <span id="wrongCount">0</span></div>
+ <div class="stat">📋 Pregunta: <span id="progress">0/40</span></div>
+</div>
+<main>
+ <div id="counter">Presiona INICIAR para comenzar</div>
+ <div id="symbolImage"><span class="emoji">📦</span></div>
+ <div id="question">Reconoce las simbologías de embalaje y aplica vocabulario de operaciones de bodega.</div>
+ <div class="answers" id="answers"></div>
+</main>
+
+<div id="feedback"></div>
+
+<div id="bubbleEffect"></div>
+
+<div id="startScreen">
+ <div class="modal">
+  <span id="startRobot">🤖</span>
+  <h2>¡Prepárate para el desafío!</h2>
+
+<input
+ id="studentName"
+ type="text"
+ placeholder="ESCRIBE TU NOMBRE"
+ oninput="this.value=this.value.toUpperCase()"
+ autocomplete="off"
+ style="
+  width:100%;
+  padding:14px;
+  font-size:20px;
+  font-weight:bold;
+  text-align:center;
+  text-transform:uppercase;
+  border:2px solid #f6c928;
+  border-radius:10px;
+  outline:none;
+  margin-bottom:12px;
+ "
+>
+
+  <p>Clasificar simbologías de bodega y almacenamiento <br> Responder preguntas del vocabulario</p>
+
+  <button id="startBtn" onclick="startGame()">INICIAR</button>
+ </div>
+</div>
+<div id="endScreen">
+ <div class="modal">
+
+<h2>NOTA FINAL</h2>
+
+<div id="finalStudent" style="
+ color:#fff;
+ font-size:23px;
+ font-weight:bold;
+ margin:15px 0;
+">
+</div>
+
+<div class="final-note" id="finalGrade">1,0</div>
+
+<div id="finalDateTime" style="
+ color:#ffe45c;
+ font-size:17px;
+ font-weight:bold;
+ line-height:1.8;
+ margin-top:15px;
+">
+</div>
+
+
+ </div>
+</div>
+<footer>Material didáctico del prof. JOSÉ VEGA HERRERA | Talca - CHILE (2026)</footer>
+
+<script>
+
+// =================================================
+//     BANCO: 68 PREGUNTAS                               
+// =================================================
+
+
+const QUESTIONS = [
+
+{"type": "s", "question": "Ícono de:", "correct": "Evitar que el producto sea congelado", "options": ["Evitar que el producto sea congelado", "Mantener siempre bajo cero", "Congelar antes de almacenar"], "emoji": "🧊", "image": "no-congelar.png"}, 
+
+{"type": "s", "question": "Ícono para:", "correct": "Usar protección ocular", "options": ["Usar protección ocular", "Usar protección auditiva", "Usar guantes térmicos"], "emoji": "🥽", "image": "antiparras.png"}, 
+
+{"type": "s", "question": "¿Significado del Ícono?", "correct": "El material puede arder", "options": ["El material puede arder", "El material no se puede mojar", "El material debe congelarse"], "emoji": "🔥", "image": "inflamable.png"}, 
+
+{"type": "s", "question": "Señalética que representa:", "correct": "El material puede arder", "options": ["El material puede arder", "El material no se puede mojar", "El material debe congelarse"], "emoji": "🔥", "image": "inflamable-2.png"}, 
+
+{"type": "s", "question": "Señalética que representa:", "correct": "El material puede arder", "options": ["El material puede arder", "El material no se puede mojar", "El material debe congelarse"], "emoji": "🔥", "image": "inflamable-3.png"}, 
+
+{"type": "s", "question": "Señalética que representa:", "correct": "No colocar unidades una sobre otra", "options": ["No colocar unidades una sobre otra", "Apilar hasta tres unidades", "Apilar solo cajas pequeñas"], "emoji": "🚫", "image": "no-apilar.png"},
+
+{"type": "s", "question": "Señalética que representa:", "correct": "No colocar unidades una sobre otra", "options": ["No colocar unidades una sobre otra", "Apilar hasta tres unidades", "Apilar solo cajas pequeñas"], "emoji": "🚫", "image": "no-apilar-2.png"},
+
+{"type": "s", "question": "Señalética que representa:", "correct": "No colocar unidades una sobre otra", "options": ["No colocar unidades una sobre otra", "Apilar hasta tres unidades", "Apilar solo cajas pequeñas"], "emoji": "🚫", "image": "no-apilar-3.png"}, 
+
+{"type": "s", "question": "Señalética que representa:", "correct": "Se permite o requiere usar gancho para manipular", "options": ["Se permite o requiere usar gancho para manipular", "Está prohibido levantar la carga", "Debe trasladarse en carretilla"], "emoji": "🪝", "image": "no-usar-gancho.png"}, 
+
+{"type": "s", "question": "¿Qué significa?", "correct": "Mantener esa cara orientada hacia arriba", "options": ["Mantener esa cara orientada hacia arriba", "Girar la caja durante el traslado", "Apoyar la caja sobre esa cara"], "emoji": "⬆️", "image": "este-lado-arriba.png"}, 
+
+{"type": "s", "question": "¿Qué significa?", "correct": "Tratar el bulto cuidadosamente", "options": ["Tratar el bulto cuidadosamente", "Lanzar el bulto para moverlo", "Presionar el embalaje"], "emoji": "🤲", "image": "manipular-con-cuidado.png"}, 
+
+{"type": "s", "question": "¿Qué significa?", "correct": "Tratar el bulto cuidadosamente", "options": ["Tratar el bulto cuidadosamente", "Lanzar el bulto para moverlo", "Presionar el embalaje"], "emoji": "🤲", "image": "manipular-con-cuidado-2.png"}, 
+
+{"type": "s", "question": "¿Qué significa?", "correct": "Disponer el apilamiento en tres por tres", "options": ["Disponer el apilamiento en tres por tres", "Apilar solo tres cajas en total", "No apilar en ninguna circunstancia"], "emoji": "📦", "image": null}, 
+
+{"type": "s", "question": "¿Qué significa?", "correct": "Manipular con equipo de horquilla", "options": ["Manipular con equipo de horquilla", "Levantar manualmente por las asas", "Usar exclusivamente un gancho"], "emoji": "🏗️", "image": "si-yegua.png"}, 
+
+{"type": "s", "question": "¿Qué indica esta simbología?", "correct": "No manipular con equipo de horquilla", "options": ["No manipular con equipo de horquilla", "Levantar manualmente por las asas", "Usar exclusivamente un gancho"], "emoji": "🏗️", "image": "no-yegua.png"}, 
+
+{"type": "s", "question": "¿Qué indica la simbología?", "correct": "La superficie puede estar caliente", "options": ["La superficie puede estar caliente", "El producto debe mantenerse congelado", "La superficie es resbaladiza"], "emoji": "♨️", "image": "no-congelar.png"}, 
+
+{"type": "s", "question": "¿Qué indica esta simbología?", "correct": "Respetar el rango o límite térmico indicado", "options": ["Respetar el rango o límite térmico indicado", "Almacenar siempre a temperatura ambiente", "Exponer el producto al calor"], "emoji": "🌡️", "image": "limite-de-temperatura.png"}, 
+
+{"type": "s", "question": "¿Qué indica esta simbología?", "correct": "El contenido puede quebrarse; manipular con cuidado", "options": ["El contenido puede quebrarse; manipular con cuidado", "El contenido soporta golpes", "El embalaje puede apilarse sin límite"], "emoji": "🍷", "image": "fragil.png"}, 
+
+{"type": "s", "question": "¿Qué indica la simbología?", "correct": "Proteger de la radiación solar directa", "options": ["Proteger de la radiación solar directa", "Dejar el producto al aire libre", "Ubicar junto a una fuente de calor"], "emoji": "☀️", "image": "proteger-del-sol.png"}, 
+
+{"type": "s", "question": "¿Qué indica esta simbología?", "correct": "No superar 8 cajas apiladas", "options": ["No superar 8 cajas apiladas", "Apilar como mínimo 8 cajas", "El pedido contiene 8 cajas exactas"], "emoji": "5️⃣", "image": "no-apilar.png"}, 
+
+{"type": "s", "question": "¿Qué indica esta simbología?", "correct": "No superar 4 cajas apiladas", "options": ["No superar 4 cajas apiladas", "Apilar como mínimo 4 cajas", "El pedido contiene 4 cajas exactas"], "emoji": "5️⃣", "image": "no-apilar-2.png"}, 
+
+{"type": "s", "question": "¿Qué indica esta simbología?", "correct": "Manipular con montacargas", "options": ["Manipular con montacargas", "Usar montacargas en todo traslado", "Levantar con grúa obligatoriamente"], "emoji": "🚫", "image": "montacarga.png"}, 
+
+{"type": "s", "question": "¿Qué indica esta simbología?", "correct": "Manipular con montacargas", "options": ["Manipular con montacargas", "Usar montacargas en todo traslado", "Levantar con grúa obligatoriamente"], "emoji": "🚫", "image": "montacarga-2.png"}, 
+
+{"type": "s", "question": "¿Qué indica la simbología?", "correct": "Referencia a material reciclado 3 veces", "options": ["Referencia a material reciclado 3 veces", "Producto que debe congelarse 3 veces", "Embalaje que no se puede reutilizar"], "emoji": "♻️", "image": "reciclado-3-veces.png"}, 
+
+{"type": "v", "question": "En Operaciones de Bodega, ¿Qué es el almacenamiento?", "correct": "Guardar productos ordenadamente en un espacio definido", "options": ["Guardar productos ordenadamente en un espacio definido", "Vender productos al cliente final", "Fabricar el embalaje"], "emoji": "📦", "image": "bodega.png"}, 
+
+{"type": "v", "question": "¿Qué es el picking?", "correct": "Preparación y selección de productos para un pedido", "options": ["Preparación y selección de productos para un pedido", "Conteo de trabajadores", "Limpieza de pasillos"], "emoji": "🧾", "image": "picking.png"}, 
+
+{"type": "v", "question": "¿Qué es el packing?", "correct": "Embalaje y acondicionamiento del pedido", "options": ["Embalaje y acondicionamiento del pedido", "Recepción de proveedores", "Ubicación de productos en racks"], "emoji": "📦", "image": null}, 
+
+{"type": "v", "question": "¿Qué significa recepción de mercaderías?", "correct": "Ingreso y verificación de productos que llegan", "options": ["Ingreso y verificación de productos que llegan", "Salida de productos vendidos", "Destrucción de embalajes"], "emoji": "📥", "image": "recepcion.png"}, 
+
+{"type": "v", "question": "Sinónimo de MERCADERÍAS:", "correct": "Productos", "options": ["Productos", "Operadores", "Consumidor"], "emoji": "📥", "image": "mercaderias-1.png"}, 
+
+{"type": "v", "question": "Sinónimo de MERCANCÍAS:", "correct": "Artículos", "options": ["Artículos", "Accesorios", "Proveedor"], "emoji": "📥", "image": "mercaderias-2.png"}, 
+
+{"type": "v", "question": "Sinónimo de BODEGA:", "correct": "Almacén", "options": ["Almacén", "Oficina", "Terminal"], "emoji": "📥", "image": "bodega.png"}, 
+
+{"type": "v", "question": "BODEGA en inglés:", "correct": "Warehouse", "options": ["Warehouse", "Skeephouse", "Indoorhouse"], "emoji": "📥", "image": "bodega.png"}, 
+
+{"type": "v", "question": "ALMACÉN en inglés:", "correct": "Storehouse", "options": ["Storehouse", "Housekeeping", "Outdoorhouse"], "emoji": "📥", "image": "bodega.png"}, 
+
+{"type": "v", "question": "¿Qué es el Despacho?", "correct": "Salida y entrega de mercancías desde la bodega", "options": ["Salida y entrega de mercancías desde la bodega", "Ingreso de productos a inventario", "Ordenamiento de estanterías"], "emoji": "🚚", "image": "transporte.png"}, 
+
+{"type": "v", "question": "¿Qué es el Inventario?", "correct": "Registro y control de las existencias", "options": ["Registro y control de las existencias", "Listado de vehículos de transporte", "Plano de evacuación"], "emoji": "📋", "image": "estanterias.png"}, 
+
+{"type": "v", "question": "¿Qué indica esta simbología?", "correct": "Estanterías de mercaderías", "options": ["Estanterías de mercaderías", "Listado de productos", "Codificación de artículos"], "emoji": "📋", "image": "estanterias.png"}, 
+
+{"type": "v", "question": "¿Qué es el Stock?", "correct": "Cantidad de productos disponibles", "options": ["Cantidad de productos disponibles", "Cantidad de operarios por turno", "Número de puertas de la bodega"], "emoji": "📊", "image": null}, 
+
+{"type": "v", "question": "¿Qué es una Ubicación de Almacenamiento?", "correct": "Posición o espacio asignado para guardar un producto", "options": ["Posición o espacio asignado para guardar un producto", "Documento tributario que acredita la venta", "Zona exclusiva de la bodega para el descanso"], "emoji": "📍", "image": null}, 
+
+{"type": "v", "question": "¿Qué es la Trazabilidad?", "correct": "Capacidad de seguir el recorrido e historial de un producto", "options": ["Capacidad de seguir el recorrido e historial de un producto", "Capacidad de apilar ordenadamente las cajas", "Velocidad de descarga respetando los límites"], "emoji": "🔎", "image": null}, 
+
+{"type": "v", "question": "¿Qué es la rotación FIFO?", "correct": "Primero en entrar, Primero en salir", "options": ["Primero en entrar, Primero en salir", "Último en entrar, Primero en salir", "Primero en vencer, Primero en salir"], "emoji": "🔄", "image": null}, 
+
+{"type": "v", "question": "¿Qué es una Unidad de Carga?", "correct": "Productos agrupados para manipular o transportar", "options": ["Productos agrupados para manipular o transportar", "Una sola estantería con productos similares", "Un pasillo de circulación dentro de la bodega"], "emoji": "🧱", "image": "pallet-con-carga.png"}, 
+
+{"type": "s", "question": "¿Qué significa esta simbología?", "correct": "Calzado de seguridad", "options": ["Calzado de seguridad", "Lentes de seguridad", "Casco de seguridad"], "emoji": "🧱", "image": "calzado-seguridad.png"}, 
+
+{"type": "s", "question": "¿Qué significa esta simbología?", "correct": "Lentes de seguridad", "options": ["Lentes de seguridad", "Calzado de seguridad", "Casco de seguridad"], "emoji": "🧱", "image": "antiparras.png"}, 
+
+{"type": "s", "question": "¿Qué significa esta simbología?", "correct": "Casco de seguridad", "options": ["Casco de seguridad", "Calzado de seguridad", "Lentes de seguridad"], "emoji": "🧱", "image": "casco-seguridad.png"}, 
+
+{"type": "s", "question": "¿Qué significa esta simbología?", "correct": "Chaleto Reflectante", "options": ["Chaleco Reflectante", "Pechera Antirradiación", "Protector Zona Lumbar"], "emoji": "🧱", "image": "chaleco-reflectante.png"}, 
+
+{"type": "s", "question": "¿Qué significa esta simbología?", "correct": "Cinta transportadora", "options": ["Cinta transportadora", "Huincha para mediciones", "Línea de Comunicación"], "emoji": "🧱", "image": "cinta-transportadora.png"}, 
+
+{"type": "s", "question": "¿Qué significa esta simbología?", "correct": "Codificación de Barras", "options": ["Codificación de Barras", "Codificación de QRs", "Codificación de Números"], "emoji": "🧱", "image": "codificar-barras.png"},
+
+{"type": "s", "question": "¿Qué significa esta simbología?", "correct": "Codificación de QRs", "options": ["Codificación de QRs", "Codificación de Barras", "Codificación de Números"], "emoji": "🧱", "image": "codificar-qrs.png"}, 
+
+{"type": "s", "question": "¿Qué significa esta simbología?", "correct": "Estanterías", "options": ["Estanterías", "Paneles", "Organizadores"], "emoji": "🧱", "image": "estanterias.png"}, 
+
+{"type": "s", "question": "Significado de esta simbología:", "correct": "Mantener congelado", "options": ["Mantener congelado", "Mantener refrigerado", "Mantener Temperatura Ambiente"], "emoji": "🧱", "image": "mantener-congelado.png"}, 
+
+{"type": "s", "question": "Significado de esta simbología:", "correct": "Usar Montacargas", "options": ["Usar Montacargas", "Usar Horquilla", "Usar Carro Manual"], "emoji": "🧱", "image": "montacarga.png"}, 
+
+{"type": "s", "question": "Significado de la simbología:", "correct": "Manipular con Montacargas", "options": ["Manipular con Montacargas", "Manipular con Horquillas", "Manipular con Carros Manuales"], "emoji": "🧱", "image": "montacarga-2.png"}, 
+
+{"type": "s", "question": "Sinónimo de HORQUILLA:", "correct": "YEGUA", "options": ["YEGUA", "CARRO MANUAL", "CARRETILLA"], "emoji": "🧱", "image": "si-yegua.png"}, 
+
+{"type": "s", "question": "¿Qué representa este Ícono?", "correct": "Usar horquilla", "options": ["Usar horquilla", "Usar carretilla", "Usar hidráulica"], "emoji": "🧱", "image": "si-yegua.png"}, 
+
+{"type": "s", "question": "¿Qué representa este Ícono?", "correct": "No congelar", "options": ["No congelar", "Si congelar", "A veces congelar"], "emoji": "🧱", "image": "no-congelar.png"},
+
+{"type": "s", "question": "¿Qué representa este Ícono?", "correct": "No usar cutter", "options": ["No usar cutter", "Si usar cutter", "Emergencia cutter"], "emoji": "🧱", "image": "no-cutter.png"}, 
+
+{"type": "s", "question": "¿Qué representa este Ícono?", "correct": "Debe usar cutter", "options": ["Debe usar cutter", "No debe usar cutter", "Ocasionalmente usar cutter"], "emoji": "🧱", "image": "si-cutter.png"}, 
+
+{"type": "s", "question": "Sinónimo de CUTTER:", "correct": "Cuchillo cartonero", "options": ["Cuchillo cartonero", "Cuchillo carcinero", "Cuchillo bodeguero"], "emoji": "🧱", "image": "si-cutter.png"}, 
+
+{"type": "s", "question": "Simbología de:", "correct": "Pallets", "options": ["Pallets", "Cajones", "Pilas"], "emoji": "🧱", "image": "pallets.png"}, 
+
+{"type": "s", "question": "Simbología de:", "correct": "Picking", "options": ["Picking", "Packing", "Pilates"], "emoji": "🧱", "image": "picking.png"}, 
+
+{"type": "s", "question": "Simbología de:", "correct": "Protector de Oídos", "options": ["Protector de Oídos", "Protector de Ojos", "Protector de Cara"], "emoji": "🧱", "image": "protector-de-oidos.png"}, 
+
+{"type": "s", "question": "Simbología de:", "correct": "Peligro de Radiación", "options": ["Peligro de Radiación", "Peligro Eléctrico", "Peligro Residuos Biológicos"], "emoji": "🧱", "image": "radiacion.png"}, 
+
+{"type": "s", "question": "Simbología de:", "correct": "Peligro Residuos Biológicos", "options": ["Peligro Residuos Biológicos", "Peligro Eléctrico", "Peligro de Radioactividad"], "emoji": "🧱", "image": "residuos-biologicos.png"}, 
+
+{"type": "s", "question": "Simbología de:", "correct": "Tapones de Oídos", "options": ["Tapones de Oídos", "Tapones Nasales", "Tapones de Calzado"], "emoji": "🧱", "image": "tapones-oidos.png"}, 
+
+{"type": "s", "question": "¿Qué representa esta Simbología?", "correct": "Despacho de Productos", "options": ["Despacho de Productos", "Recepción de Productos", "Transporte de Productos"], "emoji": "🧱", "image": "transporte.png"}, 
+
+{"type": "s", "question": "¿Qué representa esta Simbología?", "correct": "Venta telefónica", "options": ["Venta telefónica", "Venta Online", "Venta Presencial"], "emoji": "🧱", "image": "venta-telefonica.png"}, 
+
+{"type": "s", "question": "¿Qué representa esta Simbología?", "correct": "Venta Online", "options": ["Venta Online", "Venta telefónica", "Venta Presencial"], "emoji": "🧱", "image": "venta-online.png"}, 
+
+{"type": "v", "question": "¿Qué es la Zona de Recepción?", "correct": "Área donde se reciben y revisan mercancías", "options": ["Área donde se reciben y revisan mercancías", "Área donde se preparan pedidos antes del despacho", "Zona de Productos con vencimiento cercano"], "emoji": "📥", "image": "recepcion.png"}];
+
+let deck=[], index=0, correct=0, wrong=0,
+timeLeft=120, timerId=null, bubbleTimerId=null,
+locked=false, started=false;
+
+let studentName = "";
+
+const $=id=>document.getElementById(id);
+
+// EFECTO DE MUCHAS BURBUJAS
+function showBubbles(){
+
+ const container=$('bubbleEffect');
+
+ // Eliminar burbujas anteriores
+ container.innerHTML='';
+
+ const colors=['red','blue','yellow'];
+
+ // Crear 20 burbujas
+ for(let i=0;i<20;i++){
+
+  const bubble=document.createElement('div');
+
+  const size=40+Math.random()*55;
+
+  const x=(Math.random()-0.5)*320;
+  const y=(Math.random()-0.5)*280;
+
+  const color=colors[
+   Math.floor(Math.random()*colors.length)
+  ];
+
+  bubble.className='bubble '+color;
+
+  bubble.style.width=size+'px';
+  bubble.style.height=size+'px';
+
+  bubble.style.left=`calc(50% + ${x}px)`;
+  bubble.style.top=`calc(50% + ${y}px)`;
+
+  container.appendChild(bubble);
+ }
+
+ // Eliminar efecto después de 0,5 segundos
+ setTimeout(()=>{
+  container.innerHTML='';
+ },500);
+
+}
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function startGame(){
+
+ if(started)return;
+
+ // OBTENER Y VALIDAR NOMBRE DEL ESTUDIANTE
+ studentName=$('studentName').value.trim().toUpperCase();
+
+ if(studentName===""){
+  alert("POR FAVOR, INGRESA EL NOMBRE DEL ESTUDIANTE");
+  $('studentName').focus();
+  return;
+ }
+
+ started=true;
+
+ $('startScreen').style.display='none';
+
+ deck=shuffle(QUESTIONS.map(q=>({...q,options:shuffle([...q.options])})));
+ showQuestion();
+ timerId=setInterval(()=>{timeLeft--; $('timer').textContent=timeLeft;if(timeLeft<=0)finishGame();},1000);
+
+  // BURBUJAS AUTOMÁTICAS CADA 2 SEGUNDOS
+     bubbleTimerId=setInterval(()=>{
+     showBubbles();
+     },2000);
+
+}
+
+function showQuestion(){
+ if(locked)return;
+ if(index>=deck.length){finishGame();return;}
+ const q=deck[index];
+ $('counter').textContent=q.type==='v'?'VOCABULARIO DE BODEGA':'SIMBOLOGÍA DE EMBALAJE';
+ $('progress').textContent=(index+1)+'/'+deck.length;
+ $('question').textContent=q.question;
+
+ /* const holder=$('symbolImage');
+ if(q.image){holder.innerHTML='<img alt="Pictograma de la guía" src="'+q.image+'">';}
+ else {holder.innerHTML='<span class="emoji" role="img" aria-label="Símbolo ilustrativo">'+q.emoji+'</span>';} */
+
+const holder=$('symbolImage');
+
+if(q.image){
+
+ holder.innerHTML='';
+
+ const img=document.createElement('img');
+
+ img.src=q.image;
+
+ img.alt='Imagen de simbología de bodega';
+
+ img.onerror=function(){
+  holder.innerHTML='<span style="color:red;font-weight:bold">IMAGEN NO DISPONIBLE</span>';
+ };
+
+ holder.appendChild(img);
+
+}else{
+
+ holder.innerHTML=
+ '<span class="emoji">'+q.emoji+'</span>';
+
+}
+
+ const box=$('answers');box.innerHTML='';
+ const palette=['red','blue','black','green','yellow'];
+ q.options.forEach((option,i)=>{
+   const b=document.createElement('button');b.className='answer '+palette[(index+i)%palette.length];b.textContent=String.fromCharCode(65+i)+'. '+option;
+   b.onclick=()=>answer(option,b);box.appendChild(b);
+ });
+}
+
+function answer(selected,button){
+  if(locked)return;
+
+  // ACTIVAR BURBUJAS AL RESPONDER
+  showBubbles();
+
+ const q=deck[index];
+ document.querySelectorAll('.answer').forEach(b=>b.disabled=true);
+ const ok=selected===q.correct;
+ if(ok)correct++;else wrong++;
+ $('correctCount').textContent=correct;$('wrongCount').textContent=wrong;
+ const f=$('feedback');f.textContent=ok?'✔️':'❌';f.style.display='flex';f.className=ok?'good':'bad';
+ setTimeout(()=>{f.className='';f.style.display='none';f.textContent='';index++;if(index>=deck.length)finishGame();else showQuestion();},300);
+}
+
+function finishGame(){
+ if(locked)return;locked=true;
+ clearInterval(timerId);
+
+  // DETENER BURBUJAS AUTOMÁTICAS
+  clearInterval(bubbleTimerId);
+
+  // ELIMINAR BURBUJAS ACTIVAS
+  $('bubbleEffect').innerHTML='';
+
+ document.querySelectorAll('.answer').forEach(b=>b.disabled=true);
+ // Escala referencial chilena 1,0 a 7,0; 60% de logro equivale a 4,0.
+ const pct=correct/40;
+ const rawGrade=pct<=0.6 ? 1+3*(pct/0.6) : 4+3*((pct-0.6)/0.4);
+ const grade=Math.max(1,Math.min(7,Math.round(rawGrade*10)/10));
+ $('finalGrade').textContent=grade.toFixed(1).replace('.',',');
+
+// MOSTRAR NOMBRE DEL ESTUDIANTE
+$('finalStudent').textContent="ESTUDIANTE: "+studentName;
+
+// OBTENER FECHA Y HORA DEL MOMENTO DE FINALIZACIÓN
+const ahora=new Date();
+
+const fecha=ahora.toLocaleDateString('es-CL',{
+ day:'2-digit',
+ month:'2-digit',
+ year:'numeric'
+});
+
+const hora=ahora.toLocaleTimeString('es-CL',{
+ hour:'2-digit',
+ minute:'2-digit',
+ second:'2-digit',
+ hour12:false
+});
+
+// MOSTRAR FECHA Y HORA
+$('finalDateTime').innerHTML=
+ "📅 FECHA: "+fecha+
+ "<br>🕒 HORA: "+hora;
+
+
+ $('endScreen').style.display='flex';
+}
+
+
+
+</script>
+</body>
+</html>
